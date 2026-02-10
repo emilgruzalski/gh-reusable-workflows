@@ -10,11 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - "build-image" composite action for building and pushing Docker images to ghcr.io.
-- "cq-angular" composite action for Angular code quality (lint, test, build).
 - "cq-node" composite action for Node.js code quality using Bun.
 - "cq-go" composite action for Go code quality (vet, lint, test).
 - "cq-py" composite action for Python code quality using uv and ruff.
-- "ci-angular" reusable workflow.
 - "ci-go" reusable workflow.
 - "ci-node" reusable workflow.
 - "ci-py" reusable workflow.
