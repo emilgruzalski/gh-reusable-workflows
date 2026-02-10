@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "cq-py" composite action for Python code quality using uv and ruff.
 - "ci-angular" reusable workflow.
 - "ci-go" reusable workflow.
+- "ci-node" reusable workflow.
 - "ci-py" reusable workflow.
 
 ## [0.0.3] - 2025-03-02
