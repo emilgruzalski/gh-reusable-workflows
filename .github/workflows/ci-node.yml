@@ -1,0 +1,58 @@
+name: Continuous Integration Node.js
+
+on:
+  workflow_call:
+    inputs:
+      node-version-file:
+        required: false
+        type: string
+        default: "package.json"
+      working-directory:
+        required: false
+        type: string
+        default: "."
+      image-name:
+        required: true
+        type: string
+      dockerfile:
+        required: false
+        type: string
+        default: "./Dockerfile"
+      context:
+        required: false
+        type: string
+        default: "."
+      push:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Node.js code quality checks
+        uses: ./.github/actions/cq-node
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+          working-directory: ${{ inputs.working-directory }}
+
+  build-image:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and push Docker image
+        uses: ./.github/actions/build-image
+        with:
+          image-name: ${{ inputs.image-name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          context: ${{ inputs.context }}
+          push: ${{ inputs.push }}
+          github-token: ${{ github.token }}
