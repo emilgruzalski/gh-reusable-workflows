@@ -1,0 +1,45 @@
+name: Python code quality
+description: Runs linting, formatting check, and tests for Python projects using uv
+
+inputs:
+  python-version-file:
+    description: Python version file
+    required: false
+    default: "pyproject.toml"
+  working-directory:
+    description: Working directory
+    required: false
+    default: "."
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version-file: ${{ inputs.python-version-file }}
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv sync
+
+    - name: Lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv run ruff check .
+
+    - name: Format check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv run ruff format --check .
+
+    - name: Test
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv run pytest
