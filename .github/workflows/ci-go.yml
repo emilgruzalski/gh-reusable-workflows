@@ -56,3 +56,18 @@ jobs:
           context: ${{ inputs.context }}
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
+
+  sbom:
+    needs: build-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate SBOM
+        uses: ./.github/actions/sbom
+        with:
+          image: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}:sha-${{ github.sha }}
+          github-token: ${{ github.token }}

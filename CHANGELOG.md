@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "cq-node" composite action for Node.js code quality using Bun.
 - "cq-go" composite action for Go code quality (vet, lint, test).
 - "cq-py" composite action for Python code quality using uv and ruff.
+- "sbom" composite action for generating Software Bill of Materials from container images.
 - "ci-go" reusable workflow.
 - "ci-node" reusable workflow.
 - "ci-py" reusable workflow.
