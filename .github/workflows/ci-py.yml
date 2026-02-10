@@ -52,6 +52,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Generate SBOM
+        if: ${{ inputs.push }}
         uses: ./.github/actions/sbom
         with:
           image: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}:sha-${{ github.sha }}
