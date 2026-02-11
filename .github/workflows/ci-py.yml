@@ -26,29 +26,50 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      image:
+        description: Full image reference with tag
+        value: ${{ jobs.ci.outputs.image }}
+      digest:
+        description: Image digest
+        value: ${{ jobs.ci.outputs.digest }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  code-quality:
+  ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+      id-token: write
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+      digest: ${{ steps.build-image.outputs.digest }}
     steps:
       - uses: actions/checkout@v6
 
-      - name: Run Python code quality checks
+      - name: Code quality
         uses: ./.github/actions/cq-py
         with:
           python-version-file: ${{ inputs.python-version-file }}
           working-directory: ${{ inputs.working-directory }}
 
-  build-image:
-    needs: code-quality
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v6
+      - name: Security scan
+        uses: ./.github/actions/scan-image
+        with:
+          working-directory: ${{ inputs.working-directory }}
+
+      - name: Generate SBOM
+        uses: ./.github/actions/sbom
+        with:
+          working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image
+        id: build-image
         uses: ./.github/actions/build-image
         with:
           image-name: ${{ inputs.image-name }}
@@ -56,3 +77,10 @@ jobs:
           context: ${{ inputs.context }}
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
+
+      - name: Sign image
+        if: ${{ inputs.push }}
+        uses: ./.github/actions/sign-image
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          digest: ${{ steps.build-image.outputs.digest }}

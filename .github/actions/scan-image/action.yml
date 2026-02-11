@@ -1,0 +1,39 @@
+name: Security scan
+description: Scans source code and dependencies for vulnerabilities using Trivy
+
+inputs:
+  working-directory:
+    description: Path to the source code directory to scan
+    required: false
+    default: "."
+  severity:
+    description: Severity levels to scan for (comma-separated)
+    required: false
+    default: "CRITICAL,HIGH"
+  exit-code:
+    description: Exit code when vulnerabilities are found (1 to fail, 0 to warn)
+    required: false
+    default: "1"
+  upload-sarif:
+    description: Whether to upload SARIF results to GitHub Security tab
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.33.1
+      with:
+        scan-type: "fs"
+        scan-ref: ${{ inputs.working-directory }}
+        format: "sarif"
+        output: "trivy-results.sarif"
+        severity: ${{ inputs.severity }}
+        exit-code: ${{ inputs.exit-code }}
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      if: ${{ inputs.upload-sarif == 'true' && always() }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: "trivy-results.sarif"

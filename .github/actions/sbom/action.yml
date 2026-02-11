@@ -1,0 +1,56 @@
+name: Generate SBOM
+description: Generates a CycloneDX Software Bill of Materials using cdxgen
+
+inputs:
+  working-directory:
+    description: Path to the source code directory to scan
+    required: false
+    default: "."
+  output:
+    description: Output file path for the SBOM
+    required: false
+    default: "bom.json"
+  artifact-name:
+    description: Name for the uploaded SBOM artifact
+    required: false
+    default: "sbom"
+  server-url:
+    description: Dependency Track server URL (optional)
+    required: false
+    default: ""
+  api-key:
+    description: Dependency Track API key (optional)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+
+    - name: Install cdxgen
+      shell: bash
+      run: bun install -g @cyclonedx/cdxgen
+
+    - name: Generate SBOM
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cdxgen -r -o ${{ inputs.output }}
+
+    - name: Submit to Dependency Track
+      if: ${{ inputs.server-url != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cdxgen --server-url "${{ inputs.server-url }}" --api-key "${{ inputs.api-key }}" -o ${{ inputs.output }}
+
+    - name: Upload SBOM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.working-directory }}/${{ inputs.output }}
