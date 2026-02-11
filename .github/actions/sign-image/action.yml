@@ -1,0 +1,22 @@
+name: Sign container image
+description: Signs a container image using Cosign (keyless signing with Sigstore)
+
+inputs:
+  image:
+    description: Full container image reference (e.g., ghcr.io/owner/image:tag)
+    required: true
+  digest:
+    description: Image digest for signing (e.g., sha256:abc123...)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3
+
+    - name: Sign image with Cosign
+      shell: bash
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+      run: cosign sign --yes "${{ inputs.image }}@${{ inputs.digest }}"

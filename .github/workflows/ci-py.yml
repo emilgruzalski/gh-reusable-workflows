@@ -26,6 +26,17 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      image:
+        description: Full image reference with tag
+        value: ${{ jobs.ci.outputs.image }}
+      digest:
+        description: Image digest
+        value: ${{ jobs.ci.outputs.digest }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -33,6 +44,11 @@ jobs:
     permissions:
       contents: write
       packages: write
+      security-events: write
+      id-token: write
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+      digest: ${{ steps.build-image.outputs.digest }}
     steps:
       - uses: actions/checkout@v6
 
@@ -43,6 +59,7 @@ jobs:
           working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image
+        id: build-image
         uses: ./.github/actions/build-image
         with:
           image-name: ${{ inputs.image-name }}
@@ -51,9 +68,22 @@ jobs:
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
 
+      - name: Scan image for vulnerabilities
+        if: ${{ inputs.push }}
+        uses: ./.github/actions/scan-image
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Sign image
+        if: ${{ inputs.push }}
+        uses: ./.github/actions/sign-image
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          digest: ${{ steps.build-image.outputs.digest }}
+
       - name: Generate SBOM
         if: ${{ inputs.push }}
         uses: ./.github/actions/sbom
         with:
-          image: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}:sha-${{ github.sha }}
+          image: ${{ steps.build-image.outputs.image }}
           github-token: ${{ github.token }}
