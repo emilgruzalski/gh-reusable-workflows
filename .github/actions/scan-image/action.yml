@@ -1,10 +1,11 @@
-name: Scan container image
-description: Scans a container image for vulnerabilities using Trivy
+name: Security scan
+description: Scans source code and dependencies for vulnerabilities using Trivy
 
 inputs:
-  image:
-    description: Full container image reference (e.g., ghcr.io/owner/image:tag)
-    required: true
+  working-directory:
+    description: Path to the source code directory to scan
+    required: false
+    default: "."
   severity:
     description: Severity levels to scan for (comma-separated)
     required: false
@@ -22,9 +23,10 @@ runs:
   using: composite
   steps:
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.33.1
       with:
-        image-ref: ${{ inputs.image }}
+        scan-type: "fs"
+        scan-ref: ${{ inputs.working-directory }}
         format: "sarif"
         output: "trivy-results.sarif"
         severity: ${{ inputs.severity }}

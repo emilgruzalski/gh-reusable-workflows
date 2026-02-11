@@ -68,11 +68,10 @@ jobs:
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
 
-      - name: Scan image for vulnerabilities
-        if: ${{ inputs.push }}
+      - name: Security scan
         uses: ./.github/actions/scan-image
         with:
-          image: ${{ steps.build-image.outputs.image }}
+          working-directory: ${{ inputs.working-directory }}
 
       - name: Sign image
         if: ${{ inputs.push }}
