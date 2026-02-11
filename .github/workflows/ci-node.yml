@@ -82,8 +82,6 @@ jobs:
           digest: ${{ steps.build-image.outputs.digest }}
 
       - name: Generate SBOM
-        if: ${{ inputs.push }}
         uses: ./.github/actions/sbom
         with:
-          image: ${{ steps.build-image.outputs.image }}
-          github-token: ${{ github.token }}
+          working-directory: ${{ inputs.working-directory }}

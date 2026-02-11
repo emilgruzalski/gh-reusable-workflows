@@ -1,33 +1,54 @@
 name: Generate SBOM
-description: Generates a Software Bill of Materials for a container image and uploads it as an artifact
+description: Generates a CycloneDX Software Bill of Materials using cdxgen
 
 inputs:
-  image:
-    description: Full container image reference (e.g., ghcr.io/owner/image:tag)
-    required: true
-  github-token:
-    description: GitHub token for ghcr.io authentication
-    required: true
-  format:
-    description: SBOM output format (spdx-json, cyclonedx-json)
+  working-directory:
+    description: Path to the source code directory to scan
     required: false
-    default: "spdx-json"
+    default: "."
+  output:
+    description: Output file path for the SBOM
+    required: false
+    default: "bom.json"
   artifact-name:
     description: Name for the uploaded SBOM artifact
     required: false
     default: "sbom"
-  dependency-snapshot:
-    description: Whether to submit SBOM to GitHub Dependency Submission API
+  server-url:
+    description: Dependency Track server URL (optional)
     required: false
-    default: "true"
+    default: ""
+  api-key:
+    description: Dependency Track API key (optional)
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+
+    - name: Install cdxgen
+      shell: bash
+      run: bun install -g @cyclonedx/cdxgen
+
     - name: Generate SBOM
-      uses: anchore/sbom-action@v0
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cdxgen -r -o ${{ inputs.output }}
+
+    - name: Submit to Dependency Track
+      if: ${{ inputs.server-url != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cdxgen --server-url "${{ inputs.server-url }}" --api-key "${{ inputs.api-key }}" -o ${{ inputs.output }}
+
+    - name: Upload SBOM artifact
+      uses: actions/upload-artifact@v4
       with:
-        image: ${{ inputs.image }}
-        format: ${{ inputs.format }}
-        artifact-name: ${{ inputs.artifact-name }}
-        dependency-snapshot: ${{ inputs.dependency-snapshot }}
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.working-directory }}/${{ inputs.output }}
