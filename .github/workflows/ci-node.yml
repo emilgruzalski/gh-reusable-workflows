@@ -53,24 +53,24 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Code quality
-        uses: ./.github/actions/cq-node
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-node@main
         with:
           node-version-file: ${{ inputs.node-version-file }}
           working-directory: ${{ inputs.working-directory }}
 
       - name: Security scan
-        uses: ./.github/actions/scan-image
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/scan-image@main
         with:
           working-directory: ${{ inputs.working-directory }}
 
       - name: Generate SBOM
-        uses: ./.github/actions/sbom
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sbom@main
         with:
           working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image
         id: build-image
-        uses: ./.github/actions/build-image
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/build-image@main
         with:
           image-name: ${{ inputs.image-name }}
           dockerfile: ${{ inputs.dockerfile }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Sign image
         if: ${{ inputs.push }}
-        uses: ./.github/actions/sign-image
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sign-image@main
         with:
           image: ${{ steps.build-image.outputs.image }}
           digest: ${{ steps.build-image.outputs.digest }}
