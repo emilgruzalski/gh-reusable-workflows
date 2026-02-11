@@ -58,6 +58,16 @@ jobs:
           go-version-file: ${{ inputs.go-version-file }}
           working-directory: ${{ inputs.working-directory }}
 
+      - name: Security scan
+        uses: ./.github/actions/scan-image
+        with:
+          working-directory: ${{ inputs.working-directory }}
+
+      - name: Generate SBOM
+        uses: ./.github/actions/sbom
+        with:
+          working-directory: ${{ inputs.working-directory }}
+
       - name: Build and push Docker image
         id: build-image
         uses: ./.github/actions/build-image
@@ -68,19 +78,9 @@ jobs:
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
 
-      - name: Security scan
-        uses: ./.github/actions/scan-image
-        with:
-          working-directory: ${{ inputs.working-directory }}
-
       - name: Sign image
         if: ${{ inputs.push }}
         uses: ./.github/actions/sign-image
         with:
           image: ${{ steps.build-image.outputs.image }}
           digest: ${{ steps.build-image.outputs.digest }}
-
-      - name: Generate SBOM
-        uses: ./.github/actions/sbom
-        with:
-          working-directory: ${{ inputs.working-directory }}
