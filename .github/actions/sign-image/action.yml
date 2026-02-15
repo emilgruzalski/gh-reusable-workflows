@@ -1,22 +1,31 @@
 name: Sign container image
 description: Signs a container image using Cosign (keyless signing with Sigstore)
+author: 'Emil Gruzalski'
+
+branding:
+  icon: 'shield'
+  color: 'green'
 
 inputs:
   image:
-    description: Full container image reference (e.g., ghcr.io/owner/image:tag)
+    description: 'Full container image reference including registry and tag (e.g., ghcr.io/owner/image:tag). This will be signed with Sigstore.'
     required: true
   digest:
-    description: Image digest for signing (e.g., sha256:abc123...)
+    description: 'SHA256 digest of the image to sign (e.g., sha256:abc123...). Used to ensure signature is tied to exact image content.'
     required: true
 
 runs:
   using: composite
   steps:
     - name: Install Cosign
-      uses: sigstore/cosign-installer@v3
+      uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
 
     - name: Sign image with Cosign
       shell: bash
       env:
         COSIGN_EXPERIMENTAL: "true"
-      run: cosign sign --yes "${{ inputs.image }}@${{ inputs.digest }}"
+      run: |
+        cosign sign --yes "${{ inputs.image }}@${{ inputs.digest }}"
+        echo "## Image Signed" >> "$GITHUB_STEP_SUMMARY"
+        echo "Signed: \`${{ inputs.image }}@${{ inputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
+        echo "Using keyless signing with Sigstore" >> "$GITHUB_STEP_SUMMARY"

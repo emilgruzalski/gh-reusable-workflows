@@ -1,21 +1,26 @@
 name: Security scan
 description: Scans source code and dependencies for vulnerabilities using Trivy
+author: 'Emil Gruzalski'
+
+branding:
+  icon: 'shield'
+  color: 'red'
 
 inputs:
   working-directory:
-    description: Path to the source code directory to scan
+    description: 'Directory containing source code and dependencies to scan for security vulnerabilities. Defaults to repository root.'
     required: false
     default: "."
   severity:
-    description: Severity levels to scan for (comma-separated)
+    description: 'Comma-separated list of vulnerability severity levels to report (UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL). Only specified severities will be included in results.'
     required: false
     default: "CRITICAL,HIGH"
   exit-code:
-    description: Exit code when vulnerabilities are found (1 to fail, 0 to warn)
+    description: 'Exit code to return when vulnerabilities are found. Use 1 to fail the workflow, or 0 to report as warnings only.'
     required: false
     default: "1"
   upload-sarif:
-    description: Whether to upload SARIF results to GitHub Security tab
+    description: 'Whether to upload scan results to GitHub Security tab for code scanning alerts. Requires security-events: write permission.'
     required: false
     default: "true"
 
@@ -23,7 +28,7 @@ runs:
   using: composite
   steps:
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.33.1
+      uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
       with:
         scan-type: "fs"
         scan-ref: ${{ inputs.working-directory }}
@@ -34,6 +39,6 @@ runs:
 
     - name: Upload Trivy scan results to GitHub Security tab
       if: ${{ inputs.upload-sarif == 'true' && always() }}
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3.32.3
       with:
         sarif_file: "trivy-results.sarif"

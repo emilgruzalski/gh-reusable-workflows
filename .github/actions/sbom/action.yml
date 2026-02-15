@@ -1,25 +1,30 @@
 name: Generate SBOM
 description: Generates a CycloneDX Software Bill of Materials using cdxgen
+author: 'Emil Gruzalski'
+
+branding:
+  icon: 'file-text'
+  color: 'purple'
 
 inputs:
   working-directory:
-    description: Path to the source code directory to scan
+    description: 'Directory containing source code to scan for dependencies. SBOM will be generated for this directory and all subdirectories.'
     required: false
     default: "."
   output:
-    description: Output file path for the SBOM
+    description: 'Output filename for the generated SBOM in CycloneDX JSON format.'
     required: false
     default: "bom.json"
   artifact-name:
-    description: Name for the uploaded SBOM artifact
+    description: 'Name for the GitHub Actions artifact containing the SBOM. Will appear in the workflow run artifacts.'
     required: false
     default: "sbom"
   server-url:
-    description: Dependency Track server URL (optional)
+    description: 'Dependency Track server URL for automatic SBOM upload (e.g., https://dtrack.example.com). Leave empty to skip upload.'
     required: false
     default: ""
   api-key:
-    description: Dependency Track API key (optional)
+    description: 'Dependency Track API key for authentication. Required only when server-url is provided.'
     required: false
     default: ""
 
@@ -27,30 +32,33 @@ runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: 24
 
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v2
+      uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
 
     - name: Install cdxgen
       shell: bash
       run: bun install -g @cyclonedx/cdxgen
 
-    - name: Generate SBOM
+    - name: Generate and optionally submit SBOM
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: cdxgen -r -o ${{ inputs.output }}
-
-    - name: Submit to Dependency Track
-      if: ${{ inputs.server-url != '' }}
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: cdxgen --server-url "${{ inputs.server-url }}" --api-key "${{ inputs.api-key }}" -o ${{ inputs.output }}
+      run: |
+        if [ -n "${{ inputs.server-url }}" ]; then
+          echo "Generating SBOM and uploading to Dependency Track..."
+          cdxgen -r --server-url "${{ inputs.server-url }}" --api-key "${{ inputs.api-key }}" -o ${{ inputs.output }}
+        else
+          echo "Generating SBOM..."
+          cdxgen -r -o ${{ inputs.output }}
+        fi
+        echo "## SBOM Generated" >> "$GITHUB_STEP_SUMMARY"
+        echo "SBOM file: \`${{ inputs.output }}\`" >> "$GITHUB_STEP_SUMMARY"
 
     - name: Upload SBOM artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.working-directory }}/${{ inputs.output }}
