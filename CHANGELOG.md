@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-15
+
+### Added
+
+- Comprehensive README.md files for all 7 composite actions with usage examples, inputs/outputs documentation, and troubleshooting guides.
+- Author metadata (`author: 'Emil Gruzalski'`) to all composite actions.
+- Branding (icons and colors) to all composite actions for improved GitHub Marketplace presentation.
+- Coverage output to "cq-go" action (`coverage` output with test coverage percentage).
+- Test result outputs to "cq-node" and "cq-py" actions (`test-result` output).
+- Input validation in "build-image" action (validates image name format before building).
+- Job summaries using `$GITHUB_STEP_SUMMARY` in all composite actions for improved visibility.
+- Timeout protection to all workflow jobs (15-30 minutes depending on job type).
+- Inline permission documentation explaining why each permission is needed in all workflows.
+- "dependency-review" reusable workflow for PR-based dependency vulnerability scanning.
+- Workflow templates in `.github/workflow-templates/` for easy adoption (5 templates: ci-go, ci-node, ci-python, dependency-review, secret-scan).
+- Caching to setup steps (Go, Node.js, Python) for faster builds.
+
+### Changed
+
+- Pinned all GitHub Actions to full 40-character commit SHAs instead of version tags for supply chain security (18 actions updated).
+- Enhanced all input descriptions with detailed explanations, examples, and default behavior documentation.
+- Improved concurrency control to use PR numbers and only cancel PR builds, not push builds.
+- Optimized "sbom" action to eliminate duplicate cdxgen execution when uploading to Dependency Track.
+
+### Fixed
+
+- "sbom" action now runs cdxgen only once (previously ran twice when server-url was provided).
+
 ## [1.0.0] - 2026-02-11
 
 ### Added

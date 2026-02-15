@@ -1,31 +1,36 @@
 name: Build and push Docker image
 description: Builds a Docker image and pushes it to ghcr.io
+author: 'Emil Gruzalski'
+
+branding:
+  icon: 'package'
+  color: 'blue'
 
 inputs:
   image-name:
-    description: Image name (without registry prefix)
+    description: 'Name of the Docker image (without registry prefix). Will be pushed to ghcr.io/<owner>/<image-name>.'
     required: true
   dockerfile:
-    description: Path to Dockerfile
+    description: 'Path to the Dockerfile relative to the build context. Defaults to ./Dockerfile.'
     required: false
     default: "./Dockerfile"
   context:
-    description: Docker build context
+    description: 'Docker build context directory. The path from which Docker will build the image. Defaults to repository root.'
     required: false
     default: "."
   platforms:
-    description: Target platforms for multi-arch builds (comma-separated)
+    description: 'Comma-separated list of target platforms for multi-architecture builds (e.g., linux/amd64,linux/arm64,linux/arm/v7).'
     required: false
     default: "linux/amd64,linux/arm64"
   push:
-    description: Whether to push the image
+    description: 'Whether to push the built image to the registry. Set to false for testing builds locally.'
     required: false
     default: "true"
   github-token:
-    description: GitHub token for ghcr.io authentication
+    description: 'GitHub token for authenticating to ghcr.io. Typically use ${{ github.token }}.'
     required: true
   build-args:
-    description: Docker build arguments (newline-separated)
+    description: 'Docker build arguments, one per line (e.g., ARG_NAME=value). Used to pass build-time variables to the Dockerfile.'
     required: false
     default: ""
 
@@ -40,14 +45,22 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [[ ! "${{ inputs.image-name }}" =~ ^[a-z0-9][a-z0-9-]*[a-z0-9]$ ]]; then
+          echo "Error: image-name must contain only lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen"
+          exit 1
+        fi
+
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
     - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -55,7 +68,7 @@ runs:
 
     - name: Extract Docker metadata
       id: meta
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}
         tags: |
@@ -68,7 +81,7 @@ runs:
 
     - name: Build and push Docker image
       id: build
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
       with:
         context: ${{ inputs.context }}
         file: ${{ inputs.dockerfile }}
@@ -83,4 +96,9 @@ runs:
     - name: Set image reference output
       id: image-ref
       shell: bash
-      run: echo "image=ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}:sha-$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+      run: |
+        IMAGE_REF="ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
+        echo "image=$IMAGE_REF" >> "$GITHUB_OUTPUT"
+        echo "## Docker Image Built" >> "$GITHUB_STEP_SUMMARY"
+        echo "Image: \`$IMAGE_REF\`" >> "$GITHUB_STEP_SUMMARY"
+        echo "Digest: \`${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"

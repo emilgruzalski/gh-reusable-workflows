@@ -1,0 +1,23 @@
+name: CI - Python
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-py.yml@v1
+    with:
+      image-name: 'my-python-app'  # Replace with your app name
+      python-version-file: 'pyproject.toml'
+      working-directory: '.'
+      dockerfile: './Dockerfile'
+      context: '.'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+      id-token: write

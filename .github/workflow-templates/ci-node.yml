@@ -1,0 +1,23 @@
+name: CI - Node.js
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-node.yml@v1
+    with:
+      image-name: 'my-node-app'  # Replace with your app name
+      node-version-file: 'package.json'
+      working-directory: '.'
+      dockerfile: './Dockerfile'
+      context: '.'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+      id-token: write

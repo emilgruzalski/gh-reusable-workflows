@@ -1,26 +1,37 @@
 name: Node code quality
 description: Runs lint, tests, and build for Node.js projects using Bun
+author: 'Emil Gruzalski'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
 
 inputs:
   node-version-file:
-    description: Node.js version file
+    description: 'Path to file containing Node.js version (package.json, .nvmrc, or .node-version). Used to determine which Node version to install.'
     required: false
     default: "package.json"
   working-directory:
-    description: Working directory
+    description: 'Directory containing the Node.js project to test, lint, and build. Defaults to repository root.'
     required: false
     default: "."
+
+outputs:
+  test-result:
+    description: 'Test execution result (success/failure)'
+    value: ${{ steps.test.outputs.result }}
 
 runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version-file: ${{ inputs.node-version-file }}
+        cache: 'npm'
 
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v2
+      uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
 
     - name: Install dependencies
       shell: bash
@@ -33,11 +44,18 @@ runs:
       run: bun run lint
 
     - name: Test
+      id: test
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: bun test
+      run: |
+        bun test && echo "result=success" >> "$GITHUB_OUTPUT" || echo "result=failure" >> "$GITHUB_OUTPUT"
+        echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+        echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
 
     - name: Build
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: bun run build
+      run: |
+        bun run build
+        echo "## Build Status" >> "$GITHUB_STEP_SUMMARY"
+        echo "✅ Build successful" >> "$GITHUB_STEP_SUMMARY"
