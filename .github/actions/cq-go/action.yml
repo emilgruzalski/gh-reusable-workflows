@@ -52,7 +52,16 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         go test -race -coverprofile=coverage.out ./...
-        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+        if [ -f coverage.out ]; then
+          TOTAL_LINE=$(go tool cover -func=coverage.out | grep 'total' || true)
+          if [ -n "$TOTAL_LINE" ]; then
+            COVERAGE=$(awk '{print $3}' <<< "$TOTAL_LINE")
+          else
+            COVERAGE="0.0%"
+          fi
+        else
+          COVERAGE="0.0%"
+        fi
         echo "coverage=$COVERAGE" >> "$GITHUB_OUTPUT"
         echo "## Test Coverage" >> "$GITHUB_STEP_SUMMARY"
         echo "Coverage: $COVERAGE" >> "$GITHUB_STEP_SUMMARY"
