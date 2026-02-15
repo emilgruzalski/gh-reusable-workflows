@@ -48,7 +48,7 @@ runs:
     - name: Validate inputs
       shell: bash
       run: |
-        if [[ ! "${{ inputs.image-name }}" =~ ^[a-z0-9][a-z0-9-]*[a-z0-9]$ ]]; then
+        if [[ ! "${{ inputs.image-name }}" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$ ]]; then
           echo "Error: image-name must contain only lowercase letters, numbers, and hyphens, must start and end with a lowercase letter or number, and must be at least two characters long"
           exit 1
         fi
