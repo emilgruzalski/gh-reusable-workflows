@@ -27,7 +27,7 @@ inputs:
     required: false
     default: "true"
   github-token:
-    description: 'GitHub token for authenticating to ghcr.io. Typically use ${{ github.token }}.'
+    description: 'GitHub token for authenticating to ghcr.io. Typically use secrets.GITHUB_TOKEN or github.token.'
     required: true
   build-args:
     description: 'Docker build arguments, one per line (e.g., ARG_NAME=value). Used to pass build-time variables to the Dockerfile.'
