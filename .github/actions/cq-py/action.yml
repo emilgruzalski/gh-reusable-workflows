@@ -54,6 +54,13 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        uv run pytest && echo "result=success" >> "$GITHUB_OUTPUT" || echo "result=failure" >> "$GITHUB_OUTPUT"
-        echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
-        echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        if uv run pytest; then
+          echo "result=success" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "result=failure" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "❌ Tests failed" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi
