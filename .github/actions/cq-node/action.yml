@@ -47,9 +47,17 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        bun test && echo "result=success" >> "$GITHUB_OUTPUT" || echo "result=failure" >> "$GITHUB_OUTPUT"
+        if bun test; then
+          echo "result=success" >> "$GITHUB_OUTPUT"
+        else
+          echo "result=failure" >> "$GITHUB_OUTPUT"
+          TEST_FAILED=1
+        fi
         echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
         echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        if [ "${TEST_FAILED:-0}" -ne 0 ]; then
+          exit 1
+        fi
 
     - name: Build
       shell: bash
