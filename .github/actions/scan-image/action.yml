@@ -18,11 +18,7 @@ inputs:
   exit-code:
     description: 'Exit code to return when vulnerabilities are found. Use 1 to fail the workflow, or 0 to report as warnings only.'
     required: false
-    default: "1"
-  upload-sarif:
-    description: 'Whether to upload scan results to GitHub Security tab for code scanning alerts. Requires security-events: write permission.'
-    required: false
-    default: "true"
+    default: "0"
 
 runs:
   using: composite
@@ -32,13 +28,6 @@ runs:
       with:
         scan-type: "fs"
         scan-ref: ${{ inputs.working-directory }}
-        format: "sarif"
-        output: "trivy-results.sarif"
+        format: "table"
         severity: ${{ inputs.severity }}
         exit-code: ${{ inputs.exit-code }}
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      if: ${{ inputs.upload-sarif == 'true' && always() }}
-      uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
-      with:
-        sarif_file: "trivy-results.sarif"
