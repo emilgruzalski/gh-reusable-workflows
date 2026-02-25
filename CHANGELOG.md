@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-25
+
+### Changed
+
+- 'actions/dependency-review-action' from 4.8.2 to 4.8.3.
+- 'trufflesecurity/trufflehog' from 3.93.3 to 3.93.4.
+
 ## [1.1.0] - 2026-02-15
 
 ### Added
