@@ -1,4 +1,4 @@
-name: CI - Go
+name: CI - Java
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   ci:
-    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-go.yml@v1
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-java.yml@v1
     with:
-      image-name: 'my-go-app'  # Replace with your app name
-      go-version-file: 'go.mod'
+      image-name: 'my-java-app'  # Replace with your app name
+      java-version: '21'
       working-directory: '.'
       dockerfile: './Dockerfile'
       context: '.'

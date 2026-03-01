@@ -1,12 +1,12 @@
-name: Continuous Integration Python
+name: Continuous Integration Java
 
 on:
   workflow_call:
     inputs:
-      python-version-file:
+      java-version:
         required: false
         type: string
-        default: "pyproject.toml"
+        default: "21"
       working-directory:
         required: false
         type: string
@@ -52,9 +52,9 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Code quality
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-py@v1
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-java@v1
         with:
-          python-version-file: ${{ inputs.python-version-file }}
+          java-version: ${{ inputs.java-version }}
           working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image

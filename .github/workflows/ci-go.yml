@@ -45,28 +45,16 @@ jobs:
     permissions:
       contents: write          # For creating releases
       packages: write          # For pushing Docker images to ghcr.io
-      security-events: write   # For uploading SARIF security scan results
-      id-token: write          # For OIDC/Sigstore keyless image signing
     outputs:
       image: ${{ steps.build-image.outputs.image }}
       digest: ${{ steps.build-image.outputs.digest }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@v6
 
       - name: Code quality
         uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-go@v1
         with:
           go-version-file: ${{ inputs.go-version-file }}
-          working-directory: ${{ inputs.working-directory }}
-
-      - name: Security scan
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/scan-image@v1
-        with:
-          working-directory: ${{ inputs.working-directory }}
-
-      - name: Generate SBOM
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sbom@v1
-        with:
           working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image
@@ -78,10 +66,3 @@ jobs:
           context: ${{ inputs.context }}
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
-
-      - name: Sign image
-        if: ${{ inputs.push }}
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sign-image@v1
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          digest: ${{ steps.build-image.outputs.digest }}

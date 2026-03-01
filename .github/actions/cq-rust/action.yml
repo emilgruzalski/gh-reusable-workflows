@@ -1,18 +1,18 @@
-name: Python code quality
-description: Runs linting, formatting check, and tests for Python projects using uv
+name: Rust code quality
+description: Runs formatting check, linting (Clippy), and tests for Rust projects
 author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'
-  color: 'yellow'
+  color: 'orange'
 
 inputs:
-  python-version-file:
-    description: 'Path to file containing Python version configuration (pyproject.toml, .python-version). Used to determine which Python version to install.'
+  toolchain:
+    description: 'Rust toolchain to install (e.g., stable, nightly, 1.78). If rust-toolchain.toml exists in the working directory, it takes precedence.'
     required: false
-    default: "pyproject.toml"
+    default: "stable"
   working-directory:
-    description: 'Directory containing the Python project to test, lint, and format check. Defaults to repository root.'
+    description: 'Directory containing the Rust project to test and lint. Defaults to repository root.'
     required: false
     default: "."
 
@@ -24,37 +24,28 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install uv
-      uses: astral-sh/setup-uv@v7
+    - name: Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
-        enable-cache: true
-
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version-file: ${{ inputs.python-version-file }}
-
-    - name: Install dependencies
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: uv sync
-
-    - name: Lint
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: uv run ruff check .
+        toolchain: ${{ inputs.toolchain }}
+        components: clippy, rustfmt
 
     - name: Format check
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: uv run ruff format --check .
+      run: cargo fmt --check
+
+    - name: Lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo clippy -- -D warnings
 
     - name: Test
       id: test
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        if uv run pytest; then
+        if cargo test; then
           echo "result=success" >> "$GITHUB_OUTPUT"
           echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
           echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"

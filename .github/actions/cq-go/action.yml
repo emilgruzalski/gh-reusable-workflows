@@ -1,6 +1,6 @@
 name: Go code quality
 description: Runs linting and tests for Go projects
-author: 'Emil Gruzalski'
+author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'
@@ -25,7 +25,7 @@ runs:
   using: composite
   steps:
     - name: Setup Go
-      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+      uses: actions/setup-go@v6
       with:
         go-version-file: ${{ inputs.go-version-file }}
         cache-dependency-path: ${{ inputs.working-directory }}/go.sum
@@ -42,7 +42,7 @@ runs:
       run: go vet ./...
 
     - name: Lint
-      uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
+      uses: golangci/golangci-lint-action@v6
       with:
         working-directory: ${{ inputs.working-directory }}
 

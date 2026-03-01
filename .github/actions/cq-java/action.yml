@@ -1,0 +1,54 @@
+name: Java code quality
+description: Runs compilation and tests for Java projects using Maven
+author: 'Emil Grużalski'
+
+branding:
+  icon: 'check-circle'
+  color: 'red'
+
+inputs:
+  java-version:
+    description: 'Java version to install (e.g., 17, 21). Used with Temurin distribution.'
+    required: false
+    default: "21"
+  working-directory:
+    description: 'Directory containing the Maven project to compile and test. Defaults to repository root.'
+    required: false
+    default: "."
+
+outputs:
+  test-result:
+    description: 'Test execution result (success/failure)'
+    value: ${{ steps.test.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: ${{ inputs.java-version }}
+        cache: maven
+        cache-dependency-path: ${{ inputs.working-directory }}/pom.xml
+
+    - name: Compile
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: mvn -B compile
+
+    - name: Test
+      id: test
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if mvn -B test; then
+          echo "result=success" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "result=failure" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "❌ Tests failed" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi

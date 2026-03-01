@@ -1,4 +1,4 @@
-name: CI - Go
+name: CI - .NET
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   ci:
-    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-go.yml@v1
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-dotnet.yml@v1
     with:
-      image-name: 'my-go-app'  # Replace with your app name
-      go-version-file: 'go.mod'
+      image-name: 'my-dotnet-app'  # Replace with your app name
+      global-json-file: 'global.json'
       working-directory: '.'
       dockerfile: './Dockerfile'
       context: '.'

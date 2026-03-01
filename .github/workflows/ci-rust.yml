@@ -1,12 +1,12 @@
-name: Continuous Integration Python
+name: Continuous Integration Rust
 
 on:
   workflow_call:
     inputs:
-      python-version-file:
+      toolchain:
         required: false
         type: string
-        default: "pyproject.toml"
+        default: "stable"
       working-directory:
         required: false
         type: string
@@ -52,9 +52,9 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Code quality
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-py@v1
+        uses: emilgruzalski/gh-reusable-workflows/.github/actions/cq-rust@v1
         with:
-          python-version-file: ${{ inputs.python-version-file }}
+          toolchain: ${{ inputs.toolchain }}
           working-directory: ${{ inputs.working-directory }}
 
       - name: Build and push Docker image

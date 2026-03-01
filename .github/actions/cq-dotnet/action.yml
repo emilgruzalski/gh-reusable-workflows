@@ -1,18 +1,18 @@
-name: Python code quality
-description: Runs linting, formatting check, and tests for Python projects using uv
+name: .NET code quality
+description: Runs restore, build, format check, and tests for .NET/C# projects
 author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'
-  color: 'yellow'
+  color: 'purple'
 
 inputs:
-  python-version-file:
-    description: 'Path to file containing Python version configuration (pyproject.toml, .python-version). Used to determine which Python version to install.'
+  global-json-file:
+    description: 'Path to global.json file for .NET SDK version pinning. Used to determine which .NET SDK version to install.'
     required: false
-    default: "pyproject.toml"
+    default: "global.json"
   working-directory:
-    description: 'Directory containing the Python project to test, lint, and format check. Defaults to repository root.'
+    description: 'Directory containing the .NET project or solution to build and test. Defaults to repository root.'
     required: false
     default: "."
 
@@ -24,37 +24,32 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install uv
-      uses: astral-sh/setup-uv@v7
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        enable-cache: true
+        global-json-file: ${{ inputs.global-json-file }}
 
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version-file: ${{ inputs.python-version-file }}
-
-    - name: Install dependencies
+    - name: Restore dependencies
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: uv sync
+      run: dotnet restore
 
-    - name: Lint
+    - name: Build
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: uv run ruff check .
+      run: dotnet build --no-restore
 
     - name: Format check
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: uv run ruff format --check .
+      run: dotnet format --verify-no-changes --no-restore
 
     - name: Test
       id: test
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        if uv run pytest; then
+        if dotnet test --no-build; then
           echo "result=success" >> "$GITHUB_OUTPUT"
           echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
           echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
