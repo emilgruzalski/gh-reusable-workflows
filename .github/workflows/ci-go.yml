@@ -45,8 +45,6 @@ jobs:
     permissions:
       contents: write          # For creating releases
       packages: write          # For pushing Docker images to ghcr.io
-      security-events: write   # For uploading SARIF security scan results
-      id-token: write          # For OIDC/Sigstore keyless image signing
     outputs:
       image: ${{ steps.build-image.outputs.image }}
       digest: ${{ steps.build-image.outputs.digest }}
