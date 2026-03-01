@@ -1,0 +1,21 @@
+name: CI - Rust
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-rust.yml@v1
+    with:
+      image-name: 'my-rust-app'  # Replace with your app name
+      toolchain: 'stable'
+      working-directory: '.'
+      dockerfile: './Dockerfile'
+      context: '.'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write

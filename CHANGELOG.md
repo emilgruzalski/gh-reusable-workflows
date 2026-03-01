@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - "cd-az-stapp" workflow template for easy adoption of Azure Static Web Apps deployment.
+- "cq-rust" composite action for Rust code quality (fmt, Clippy, tests).
+- "cq-java" composite action for Java code quality (Maven compile, tests).
+- "cq-dotnet" composite action for .NET code quality (build, format check, tests).
+- "ci-rust" reusable workflow and workflow template for Rust CI pipeline.
+- "ci-java" reusable workflow and workflow template for Java CI pipeline.
+- "ci-dotnet" reusable workflow and workflow template for .NET CI pipeline.
 
 ### Changed
 

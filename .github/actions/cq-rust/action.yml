@@ -1,0 +1,57 @@
+name: Rust code quality
+description: Runs formatting check, linting (Clippy), and tests for Rust projects
+author: 'Emil Grużalski'
+
+branding:
+  icon: 'check-circle'
+  color: 'orange'
+
+inputs:
+  toolchain:
+    description: 'Rust toolchain to install (e.g., stable, nightly, 1.78). If rust-toolchain.toml exists in the working directory, it takes precedence.'
+    required: false
+    default: "stable"
+  working-directory:
+    description: 'Directory containing the Rust project to test and lint. Defaults to repository root.'
+    required: false
+    default: "."
+
+outputs:
+  test-result:
+    description: 'Test execution result (success/failure)'
+    value: ${{ steps.test.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        components: clippy, rustfmt
+
+    - name: Format check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo fmt --check
+
+    - name: Lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo clippy -- -D warnings
+
+    - name: Test
+      id: test
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if cargo test; then
+          echo "result=success" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "result=failure" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "❌ Tests failed" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi

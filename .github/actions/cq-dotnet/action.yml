@@ -1,0 +1,61 @@
+name: .NET code quality
+description: Runs restore, build, format check, and tests for .NET/C# projects
+author: 'Emil Grużalski'
+
+branding:
+  icon: 'check-circle'
+  color: 'purple'
+
+inputs:
+  global-json-file:
+    description: 'Path to global.json file for .NET SDK version pinning. Used to determine which .NET SDK version to install.'
+    required: false
+    default: "global.json"
+  working-directory:
+    description: 'Directory containing the .NET project or solution to build and test. Defaults to repository root.'
+    required: false
+    default: "."
+
+outputs:
+  test-result:
+    description: 'Test execution result (success/failure)'
+    value: ${{ steps.test.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: ${{ inputs.global-json-file }}
+
+    - name: Restore dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: dotnet restore
+
+    - name: Build
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: dotnet build --no-restore
+
+    - name: Format check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: dotnet format --verify-no-changes --no-restore
+
+    - name: Test
+      id: test
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if dotnet test --no-build; then
+          echo "result=success" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Tests completed" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "result=failure" >> "$GITHUB_OUTPUT"
+          echo "## Test Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "❌ Tests failed" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi

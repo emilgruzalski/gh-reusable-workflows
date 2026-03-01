@@ -1,0 +1,21 @@
+name: CI - .NET
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-dotnet.yml@v1
+    with:
+      image-name: 'my-dotnet-app'  # Replace with your app name
+      global-json-file: 'global.json'
+      working-directory: '.'
+      dockerfile: './Dockerfile'
+      context: '.'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write

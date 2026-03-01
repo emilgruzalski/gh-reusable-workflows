@@ -2,13 +2,13 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-Production-ready, security-focused reusable GitHub Actions workflows and composite actions for Go, Node.js, and Python projects.
+Production-ready reusable GitHub Actions workflows and composite actions for Go, Node.js, Python, Rust, Java, and .NET projects.
 
 ## Overview
 
 This repository provides a collection of enterprise-grade, reusable GitHub Actions workflows and composite actions that implement modern DevOps best practices including:
 
-- 🚀 **Multi-Language Support** - Purpose-built workflows for Go, Node.js, and Python with language-specific optimizations
+- 🚀 **Multi-Language Support** - Purpose-built workflows for Go, Node.js, Python, Rust, Java, and .NET with language-specific optimizations
 - 📦 **Complete CI/CD Pipeline** - Code quality checks, testing, container builds, and deployment
 - ⚡ **Performance Optimized** - Intelligent caching, parallel execution, and efficient resource utilization
 - 📊 **Observability** - Rich job summaries and coverage reports
@@ -22,6 +22,9 @@ This repository provides a collection of enterprise-grade, reusable GitHub Actio
 | [cq-go](/.github/actions/cq-go) | Go code quality: vet, lint (golangci-lint), test with coverage | Go |
 | [cq-node](/.github/actions/cq-node) | Node.js code quality: lint, test, build using Bun | Node.js |
 | [cq-py](/.github/actions/cq-py) | Python code quality: lint (Ruff), format check, test | Python |
+| [cq-rust](/.github/actions/cq-rust) | Rust code quality: fmt, lint (Clippy), test | Rust |
+| [cq-java](/.github/actions/cq-java) | Java code quality: compile and test with Maven | Java |
+| [cq-dotnet](/.github/actions/cq-dotnet) | .NET code quality: build, format check, test | C# |
 | [build-image](/.github/actions/build-image) | Multi-arch Docker image builds with GHCR push | All |
 
 ### 🔄 Reusable Workflows
@@ -31,13 +34,16 @@ This repository provides a collection of enterprise-grade, reusable GitHub Actio
 | [ci-go.yml](/.github/workflows/ci-go.yml) | Go CI pipeline with quality checks and image build | Go services |
 | [ci-node.yml](/.github/workflows/ci-node.yml) | Node.js CI pipeline with Bun and image build | Node.js apps |
 | [ci-py.yml](/.github/workflows/ci-py.yml) | Python CI pipeline with uv and image build | Python apps |
+| [ci-rust.yml](/.github/workflows/ci-rust.yml) | Rust CI pipeline with Clippy and image build | Rust services |
+| [ci-java.yml](/.github/workflows/ci-java.yml) | Java CI pipeline with Maven and image build | Java apps |
+| [ci-dotnet.yml](/.github/workflows/ci-dotnet.yml) | .NET CI pipeline with dotnet CLI and image build | .NET apps |
 | [cd-az-stapp.yml](/.github/workflows/cd-az-stapp.yml) | Deploy to Azure Static Web Apps | Frontend apps |
 
 ## Getting Started
 
 ### Prerequisites
 
-- GitHub repository with code in Go, Node.js, or Python
+- GitHub repository with code in Go, Node.js, Python, Rust, Java, or .NET
 - GitHub Actions enabled
 - (Optional) GitHub Container Registry enabled for Docker image publishing
 
@@ -144,6 +150,75 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+```
+
+#### For Rust Projects
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-rust.yml@v1
+    with:
+      image-name: 'my-rust-service'
+      toolchain: 'stable'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write
+```
+
+#### For Java Projects
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-java.yml@v1
+    with:
+      image-name: 'my-java-app'
+      java-version: '21'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write
+```
+
+#### For .NET Projects
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: emilgruzalski/gh-reusable-workflows/.github/workflows/ci-dotnet.yml@v1
+    with:
+      image-name: 'my-dotnet-app'
+      global-json-file: 'global.json'
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      packages: write
 ```
 
 4. **Commit and push** - The workflow will run automatically!
