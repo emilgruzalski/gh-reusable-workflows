@@ -1,6 +1,6 @@
 name: Go code quality
 description: Runs linting and tests for Go projects
-author: 'Emil Gruzalski'
+author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'

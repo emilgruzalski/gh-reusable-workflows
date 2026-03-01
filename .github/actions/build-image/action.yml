@@ -1,6 +1,6 @@
 name: Build and push Docker image
 description: Builds a Docker image and pushes it to ghcr.io
-author: 'Emil Gruzalski'
+author: 'Emil Grużalski'
 
 branding:
   icon: 'package'

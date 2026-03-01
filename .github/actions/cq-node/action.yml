@@ -1,6 +1,6 @@
 name: Node code quality
 description: Runs lint, tests, and build for Node.js projects using Bun
-author: 'Emil Gruzalski'
+author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'

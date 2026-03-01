@@ -1,6 +1,6 @@
 name: Python code quality
 description: Runs linting, formatting check, and tests for Python projects using uv
-author: 'Emil Gruzalski'
+author: 'Emil Grużalski'
 
 branding:
   icon: 'check-circle'
