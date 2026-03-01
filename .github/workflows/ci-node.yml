@@ -59,16 +59,6 @@ jobs:
           node-version-file: ${{ inputs.node-version-file }}
           working-directory: ${{ inputs.working-directory }}
 
-      - name: Security scan
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/scan-image@v1
-        with:
-          working-directory: ${{ inputs.working-directory }}
-
-      - name: Generate SBOM
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sbom@v1
-        with:
-          working-directory: ${{ inputs.working-directory }}
-
       - name: Build and push Docker image
         id: build-image
         uses: emilgruzalski/gh-reusable-workflows/.github/actions/build-image@v1
@@ -78,10 +68,3 @@ jobs:
           context: ${{ inputs.context }}
           push: ${{ inputs.push }}
           github-token: ${{ github.token }}
-
-      - name: Sign image
-        if: ${{ inputs.push }}
-        uses: emilgruzalski/gh-reusable-workflows/.github/actions/sign-image@v1
-        with:
-          image: ${{ steps.build-image.outputs.image }}
-          digest: ${{ steps.build-image.outputs.digest }}
