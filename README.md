@@ -37,7 +37,6 @@ This repository provides a collection of enterprise-grade, reusable GitHub Actio
 | [ci-rust.yml](/.github/workflows/ci-rust.yml) | Rust CI pipeline with Clippy and image build | Rust services |
 | [ci-java.yml](/.github/workflows/ci-java.yml) | Java CI pipeline with Maven and image build | Java apps |
 | [ci-dotnet.yml](/.github/workflows/ci-dotnet.yml) | .NET CI pipeline with dotnet CLI and image build | .NET apps |
-| [cd-az-stapp.yml](/.github/workflows/cd-az-stapp.yml) | Deploy to Azure Static Web Apps | Frontend apps |
 
 ## Getting Started
 
@@ -105,10 +104,6 @@ Each language-specific CI workflow includes:
 3. **Observability**
    - Test coverage reports
    - Job summaries with key metrics
-
-### 🌐 CD Pipelines
-
-- **Azure Static Web Apps** - Build and deploy frontend apps with PR preview environments
 
 ### ⚙️ Configuration
 
